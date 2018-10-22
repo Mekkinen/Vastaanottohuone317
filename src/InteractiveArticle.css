@@ -1,21 +1,26 @@
-.App {
+.InteractiveArticle {
   text-align: center;
 }
 
-.App-logo {
+.psychiatristImage {
   animation: App-logo-spin infinite 20s linear;
   height: 40vmin;
 }
 
-.App-header {
+.Article-header {
   background-color: #282c34;
-  min-height: 100vh;
+  min-height: 60vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+
+.ArticleText {
+  padding: 5px 25%;
+  text-align: justify;
 }
 
 .App-link {
@@ -27,6 +32,6 @@
     transform: rotate(0deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(5deg);
   }
 }
