@@ -5,8 +5,8 @@ import kuvitus2 from './ZELDA_KUVITUS_potilas.gif';
 import './InteractiveArticle.css';
 import STORYEXP from './Story';
 
-//  const { Child1M, Child1A, Child1B, Child2M, Child2A, Child2B, Child3M, Child3A, Child3B, Child4M, Child4A, Child4B, 
-//    Child5M, Child5A, Child5B, Child6M, Child6A, Child6B, Child7M, Child7A, Child7B } = STORYEXP;
+  // const { Child1M, Child1A, Child1B, Child2M, Child2A, Child2B, Child3M, Child3A, Child3B, Child4M, Child4A, Child4B, 
+  //   Child5M, Child5A, Child5B, Child6M, Child6A, Child6B, Child7M, Child7A, Child7B } = STORYEXP;
 const Child1M = STORYEXP[0];
 const Child1A = STORYEXP[1];
 const Child1B = STORYEXP[2];
@@ -39,66 +39,70 @@ class InteractiveArticle extends Component {
             Vastaanottohuone 317
           </p>
         </div>
-        <ProceedInArticle />
+        <ArticleList />
       </div>
     );
   }
 }
 
-class ProceedInArticle extends Component {
+class ArticleList extends Component {
   constructor(props) {
     super(props);
-    this.state = {currentChildren: [EmptyElem], currentChildNum: 0, numChildren:0};
+    this.state = {currentChildren: [EmptyElem], numChildren: 0, nextButtonNum: 0 };
   };
 
   render () {
-    const ButtonsToAdd = props => (
-      <ButtonComponent addChild={this.onAddChild}
-                      numOfChildren={this.state.numChildren}>
-      </ButtonComponent>
-    );  
-    const children = [];
 
+    const texts = [];
     for (var i = 0; i < this.state.numChildren; i += 1) {
-
       if (this.state.currentChildren !== undefined) {
         this.state.currentChildren.forEach(ChildElem => {
-          children.push(<ChildElem />);
+          texts.push(ChildElem);
         });
       }
     };
 
+    var StartParagraphs = [];
+    Child1M.forEach(elem => StartParagraphs.push(<p className="ArticleText">{elem}</p>));
+
+    let renderPicture = false;
+    (this.state.nextButtonNum === 3) ? renderPicture = true : renderPicture = false;
+    const Picture2 = (<img src={kuvitus2} className="psychiatristImage" alt="psychiatristImage" />);
+
     return (
       <section>
-        {Child1M}
-        <ButtonsToAdd/>
-        {children}
+        {StartParagraphs}
+        {renderPicture && Picture2}
+        {texts}
+        <ButtonComponent addChild={this.onAddChild}
+                      nextButtonNum={this.state.nextButtonNum}>
+        </ButtonComponent>
       </section>
     );
   }
   onAddChild = (choiceNum) => {
-    const ButtonsToAdd = props => (
-      <ButtonComponent addChild={this.onAddChild}
-                      numOfChildren={this.state.numChildren}>
-      </ButtonComponent>
-    );
-    var elemToAdd = getChildTexts(this.state.currentChildNum, choiceNum)[0];
-    var elemToAdd2 = getChildTexts(this.state.currentChildNum, choiceNum)[1];
-    const btns = ButtonsToAdd;
+    // Get chosen texts
+    let textArray = getChildTexts(this.state.numChildren, choiceNum);
+    let elemToAdd = textArray[0];
+    let elemToAdd2 = textArray[1];
+    let jumpToBtn = textArray[2];
+    let paragraphs1 = [];
+    elemToAdd.forEach(elem => paragraphs1.push(<p className="ArticleText">{elem}</p>));
+    let paragraphs2 = [];
+    elemToAdd2.forEach(elem => paragraphs2.push(<p className="ArticleText">{elem}</p>));
+
+    // Update state
     this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, elemToAdd]
+      currentChildren: [...prevState.currentChildren, paragraphs1]
     }));
     this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, elemToAdd2]
-    }));
-    this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, btns]
+      currentChildren: [...prevState.currentChildren, paragraphs2]
     }));
     this.setState({
       numChildren: this.state.numChildren + 1,
-      currentChildNum: this.state.currentChildNum + 1
+      nextButtonNum: jumpToBtn
     });
-    //console.log("state: " + this.state.currentChildNum + "  " + this.state.numChildren);
+    console.log("state: " + this.state.numChildren + "  next btn: " + this.state.nextButtonNum);
   }
 };
 
@@ -148,11 +152,11 @@ const ButtonComponent = props =>
     <p className="ArticleText">
           <button style={{display: 'block', marginBottom: 10}} 
             onClick={function(event){ props.addChild(0); /*props.addChild()*/ }}>
-            {(props.numOfChildren !== undefined) ? GetButtonTexts(props.numOfChildren, 0) : GetButtonTexts(0, 0)}
+            {(props.nextButtonNum !== undefined) ? GetButtonTexts(props.nextButtonNum, 0) : GetButtonTexts(0, 0)}
           </button>
           <button style={{display: 'block', marginBottom: 10}} 
             onClick={function(event){ props.addChild(1); /*props.addChild()*/ }}>
-            {(props.numOfChildren !== undefined) ? GetButtonTexts(props.numOfChildren, 1) : GetButtonTexts(0, 1)}
+            {(props.nextButtonNum !== undefined) ? GetButtonTexts(props.nextButtonNum, 1) : GetButtonTexts(0, 1)}
           </button>
     </p>
   </div>
@@ -174,28 +178,21 @@ const TheEnd = props => (
 
 /* Create the story map
  Connect button choices to texts:
- ChildTexts[btnNum][choice] = main text + choice text 
+ ChildTexts[btnNum][choice] = main text, choice text, button to jump to 
 */
+
 var ChildTexts = [];
-ChildTexts[0] = [ ["1A", "2M"], ["1B", "2M"] ];
-ChildTexts[1] = [ ["2A", "3M"], ["2B", "4M"] ];
-// ChildTexts[0] = [[Child1A, Child2M], [Child1B, Child2M]];
-// ChildTexts[1] = [[Child2A, Child3M], [Child2B, Child4M]];
-// ChildTexts[2] = [[Child3A, Child5M], [Child3B, TheEnd]];
-// ChildTexts[3] = [[Child4A, Child7M], [Child4B, Child5M]];
-// ChildTexts[4] = [[Child5A, Child6M], [Child5B, TheEnd]];
-// ChildTexts[5] = [[Child6A, TheEnd], [Child6B, TheEnd]];
-// ChildTexts[6] = [[Child7A, TheEnd], [Child7B, TheEnd]];
+ChildTexts[0] = [[Child1A, Child2M, 1], [Child1B, Child2M, 1]];
+ChildTexts[1] = [[Child2A, Child3M, 2], [Child2B, Child4M, 3]];
+ChildTexts[2] = [[Child3A, Child5M, 4], [Child3B, TheEnd, 10]];
+ChildTexts[3] = [[Child4A, Child7M, 6], [Child4B, Child5M, 4]];
+ChildTexts[4] = [[Child5A, Child6M, 5], [Child5B, TheEnd, 10]];
+ChildTexts[5] = [[Child6A, TheEnd, 10], [Child6B, TheEnd, 10]];
+ChildTexts[6] = [[Child7A, TheEnd, 10], [Child7B, TheEnd, 10]];
 
 function getChildTexts(buttonNum, choice) {
   console.log("buttonNum: " + buttonNum + ", choice: " + choice);
-  var pair = ChildTexts[buttonNum][choice];
-  // get from STORYEXP objects according to their keys, get objects from it and return
-  var elem1 = STORYEXP.find(elem => elem.key == pair[0]);
-  var elem2 = STORYEXP.find(elem => elem.key == pair[1]);
-  const returnElems = [];
-  returnElems.push(elem1, elem2);
-  return returnElems;
+  return ChildTexts[buttonNum][choice];
 };
 
 export default InteractiveArticle;
