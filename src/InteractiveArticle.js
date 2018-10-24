@@ -30,6 +30,7 @@ const Child7A = STORYEXP[19];
 const Child7B = STORYEXP[20];
 
 class InteractiveArticle extends Component {
+
   render() {
     return (
       <div className="InteractiveArticle">
@@ -45,67 +46,84 @@ class InteractiveArticle extends Component {
   }
 }
 
+// Contains all StoryComponents
 class ArticleList extends Component {
   constructor(props) {
     super(props);
-    this.state = {currentChildren: [EmptyElem], numChildren: 0, nextButtonNum: 0 };
-  };
-
-  render () {
-
-    const texts = [];
-    for (var i = 0; i < this.state.numChildren; i += 1) {
-      if (this.state.currentChildren !== undefined) {
-        this.state.currentChildren.forEach(ChildElem => {
-          texts.push(ChildElem);
-        });
-      }
-    };
-
-    var StartParagraphs = [];
-    Child1M.forEach(elem => StartParagraphs.push(<p className="ArticleText">{elem}</p>));
-
-    let renderPicture = false;
-    (this.state.nextButtonNum === 3) ? renderPicture = true : renderPicture = false;
-    const Picture2 = (<img src={kuvitus2} className="psychiatristImage" alt="psychiatristImage" />);
-
-    return (
-      <section>
-        {StartParagraphs}
-        {renderPicture && Picture2}
-        {texts}
-        <ButtonComponent addChild={this.onAddChild}
-                      nextButtonNum={this.state.nextButtonNum}>
-        </ButtonComponent>
-      </section>
-    );
+    this.state = {texts: [EmptyElem], numChildren: 0, nextButtonNum: 0 };
   }
-  onAddChild = (choiceNum) => {
-    // Get chosen texts
+
+  onAddStory = (choiceNum) => {
+    // Get next texts and button
     let textArray = getChildTexts(this.state.numChildren, choiceNum);
     let elemToAdd = textArray[0];
     let elemToAdd2 = textArray[1];
     let jumpToBtn = textArray[2];
-    let paragraphs1 = [];
+    let paragraphs1 = []; let paragraphs2 = [];
     elemToAdd.forEach(elem => paragraphs1.push(<p className="ArticleText">{elem}</p>));
-    let paragraphs2 = [];
     elemToAdd2.forEach(elem => paragraphs2.push(<p className="ArticleText">{elem}</p>));
 
     // Update state
-    this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, paragraphs1]
-    }));
-    this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, paragraphs2]
-    }));
+    this.state.texts.push([paragraphs1, paragraphs2, jumpToBtn]);
+    this.setState(this.state);
     this.setState({
       numChildren: this.state.numChildren + 1,
       nextButtonNum: jumpToBtn
     });
-    console.log("state: " + this.state.numChildren + "  next btn: " + this.state.nextButtonNum);
+    //console.log("state: " + this.state.numChildren + "  next btn: " + this.state.nextButtonNum);
   }
-};
 
+  render () {
+
+    // Start paragraphs (Child1M)
+    var startParagraphs = [];
+    Child1M.forEach(elem => startParagraphs.push(<p className="ArticleText">{elem}</p>));
+
+    // Map StoryComponents
+    var onAdd = this.onAddStory;
+    var storyNodes = this.state.texts.map(function(component, index) {
+      return (
+        <StoryComponent choiceComponent={component[0]} MComponent={component[1]} nextButtonNum={component[2]} key={index} addChild={onAdd}></StoryComponent>
+      );
+    });
+
+    return (
+        <section>
+          {startParagraphs}
+          {storyNodes}
+        </section>
+      );
+  }
+}
+
+/* Story Component
+ - returns a comoponent of the story:
+ text, possible pics and the next button 
+ */
+
+class StoryComponent extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    // Kuvituskuva 2
+    let renderPicture = false;
+    (this.props.nextButtonNum === 3) ? renderPicture = true : renderPicture = false;
+    const Picture2 = (<img src={kuvitus2} className="psychiatristImage" alt="psychiatristImage" />);
+
+    return (
+      <section>
+        {renderPicture && Picture2}
+        {this.props.choiceComponent}
+        {this.props.MComponent}
+        <ButtonComponent addChild={this.props.addChild} nextButtonNum={this.props.nextButtonNum}></ButtonComponent>
+      </section>
+    );
+  }
+}
+
+// Button texts for each level in the story
 var ButtonTexts = [];
 ButtonTexts[0] = ["En osaa sanoa, auttaako lääke.", "Kerron, että lääke ei auta."];
 ButtonTexts[1] = ["Kerron, että pärjään.", "Sanon, että en luota itseeni."];
@@ -119,34 +137,12 @@ function GetButtonTexts(buttonNum, selectedChoice) {
   return ButtonTexts[buttonNum][selectedChoice];
 };
 
-// Tried buttoncomp. as class because wanted to deactive them
-// class ButtonComponent extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.deactive = this.deactivate.bind(this);
-//     this.state = { active: true };
-//   }
-//   deactivate() {
-//     this.className = "deactivatedBtn";
-//   }
-//   render() {
-//     return (
-//     <div className="card calculator">
-//       <p className="ArticleText">
-//             <button style={{display: 'block', marginBottom: 10}} 
-//               onClick={function(event){ this.addChild(0); this.deactivate(); /*props.addChild()*/ }}>
-//               {(this.props.numOfChildren !== undefined) ? GetButtonTexts(this.props.numOfChildren, 0) : GetButtonTexts(0, 0)}
-//             </button>
-//             <button style={{display: 'block', marginBottom: 10}} 
-//               onClick={function(event){ this.addChild(1); /*props.addChild()*/ }}>
-//               {(this.props.numOfChildren !== undefined) ? GetButtonTexts(this.props.numOfChildren, 1) : GetButtonTexts(0, 1)}
-//             </button>
-//       </p>
-//     </div>
-//     )};
-//   }
 
-const ButtonComponent = props =>
+/* Button Component returns two buttons, which represent the choices that the reader can make.
+ - if the next button number is 10, the story is over and no new buttons will be added
+ */
+
+const ButtonComponent = props => (props.nextButtonNum == '10') ? (<div></div>) :
   (
   <div className="ButtonComp">
     <p className="ArticleText">
@@ -167,13 +163,9 @@ const EmptyElem = props => (
   </section>
 );
 
-const TheEnd = props => (
-  <section>
-    <p className="ArticleText">
-      LOPPU.
-    </p>
-    </section>
-);
+const TheEnd = [
+  `LOPPU.`
+]
 
 
 /* Create the story map
@@ -191,7 +183,7 @@ ChildTexts[5] = [[Child6A, TheEnd, 10], [Child6B, TheEnd, 10]];
 ChildTexts[6] = [[Child7A, TheEnd, 10], [Child7B, TheEnd, 10]];
 
 function getChildTexts(buttonNum, choice) {
-  console.log("buttonNum: " + buttonNum + ", choice: " + choice);
+  //console.log("buttonNum: " + buttonNum + ", choice: " + choice);
   return ChildTexts[buttonNum][choice];
 };
 
