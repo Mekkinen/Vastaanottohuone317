@@ -55,7 +55,7 @@ class ArticleList extends Component {
 
   onAddStory = (choiceNum) => {
     // Get next texts and button
-    let textArray = getChildTexts(this.state.numChildren, choiceNum);
+    let textArray = getChildTexts(this.state.nextButtonNum, choiceNum);
     let elemToAdd = textArray[0];
     let elemToAdd2 = textArray[1];
     let jumpToBtn = textArray[2];
@@ -105,19 +105,28 @@ class StoryComponent extends Component {
   constructor(props) {
     super(props);
   }
-
+  buttonIsDisabled = () => {
+    //console.log("buttonisdisabledissa...");
+    var buttonClass = "disabled";
+  }
   render() {
     // Kuvituskuva 2
     let renderPicture = false;
-    (this.props.nextButtonNum === 3) ? renderPicture = true : renderPicture = false;
+    (this.props.nextButtonNum === 4) ? renderPicture = true : renderPicture = false;
     const Picture2 = (<img src={kuvitus2} className="psychiatristImage" alt="psychiatristImage" />);
+    // Are we at the end?
+    let isThisOrange = (this.props.MComponent == TheEnd) ? "orange-text" : "";
 
+    var buttonClass = (buttonClass !== "") ? "" : "disabled";
     return (
       <section>
-        {renderPicture && Picture2}
         {this.props.choiceComponent}
-        {this.props.MComponent}
-        <ButtonComponent addChild={this.props.addChild} nextButtonNum={this.props.nextButtonNum}></ButtonComponent>
+        {renderPicture && Picture2}
+        <div className={isThisOrange}>
+          {this.props.MComponent}
+        </div>
+        <ButtonComponent addChild={this.props.addChild} nextButtonNum={this.props.nextButtonNum}
+                          isDisabled={this.buttonIsDisabled} classE={buttonClass}></ButtonComponent>
       </section>
     );
   }
@@ -146,12 +155,12 @@ const ButtonComponent = props => (props.nextButtonNum == '10') ? (<div></div>) :
   (
   <div className="ButtonComp">
     <p className="ArticleText">
-          <button style={{display: 'block', marginBottom: 10}} 
-            onClick={function(event){ props.addChild(0); /*props.addChild()*/ }}>
+          <button style={{display: 'block', marginBottom: 10}} className={props.classE}
+            onClick={function(event){ props.addChild(0); props.isDisabled() }}>
             {(props.nextButtonNum !== undefined) ? GetButtonTexts(props.nextButtonNum, 0) : GetButtonTexts(0, 0)}
           </button>
-          <button style={{display: 'block', marginBottom: 10}} 
-            onClick={function(event){ props.addChild(1); /*props.addChild()*/ }}>
+          <button style={{display: 'block', marginBottom: 10}} className={props.classE} 
+            onClick={function(event){ props.addChild(1); props.isDisabled() }}>
             {(props.nextButtonNum !== undefined) ? GetButtonTexts(props.nextButtonNum, 1) : GetButtonTexts(0, 1)}
           </button>
     </p>
@@ -164,7 +173,7 @@ const EmptyElem = props => (
 );
 
 const TheEnd = [
-  `LOPPU.`
+  `♦`
 ]
 
 
