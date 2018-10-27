@@ -29,8 +29,16 @@ button.disabled {
 button.chosen {
   background-color: #000 !important;
 }
-.orange-text {
-  color: #ff4301;
+.the-end-container {
+  text-align: left;
+}
+.the-end {
+  background-color: #ff4301;
+  color: #fff;
+  text-align: left;
+  margin-bottom: 2%;
+  padding: 4px;
+  text-decoration: none;
 }
 
 .App-logo {

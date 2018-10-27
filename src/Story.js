@@ -629,7 +629,7 @@ tiedä mihin uskoa.
 
 
 export const TheEnd = [
-      `♦`
+      ` `
     ]
 
 /* Create the story map

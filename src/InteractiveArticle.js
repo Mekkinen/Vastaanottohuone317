@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import kuvitus1 from "./ZELDA_KUVITUS_psykiatri.gif";
 import kuvitus2 from "./ZELDA_KUVITUS_potilas.gif";
 import "./InteractiveArticle.css";
-import { getChildTexts, GetButtonTexts, Child1M, TheEnd } from "./Story";
+import { getChildTexts, GetButtonTexts, Child1M } from "./Story";
 
 class InteractiveArticle extends Component {
   render() {
@@ -51,7 +51,6 @@ class ArticleList extends Component {
       numChildren: this.state.numChildren + 1,
       nextButtonNum: jumpToBtn
     });
-    //console.log("state: " + this.state.numChildren + "  next btn: " + this.state.nextButtonNum);
   };
 
   render() {
@@ -90,10 +89,6 @@ class ArticleList extends Component {
  */
 
 class StoryComponent extends Component {
-  // buttonIsDisabled = () => {
-  //   //console.log("buttonisdisabledissa...");
-  //   var buttonClass = "disabled";
-  // };
   render() {
     // Kuvituskuva 2
     let renderPicture = false;
@@ -108,16 +103,35 @@ class StoryComponent extends Component {
       />
     );
     // Are we at the end?
-    let isThisOrange = this.props.MComponent == TheEnd ? "orange-text" : "";
+    let isThisRefreshSymbol =
+      this.props.nextButtonNum == 10 ? " fas fa-redo-alt the-end" : "";
+
+    // Purkka-scroll
+    var Scroll = require("react-scroll");
+    var Element = Scroll.Element;
+    var scroller = Scroll.scroller;
 
     return (
       <section>
         {this.props.choiceComponent}
         {renderPicture && Picture2}
-        <div className={isThisOrange}>{this.props.MComponent}</div>
+        {isThisRefreshSymbol ? (
+          <div className="the-end-container ArticleText">
+            <a href="." className={isThisRefreshSymbol}> </a>
+          </div>
+        ) : (
+          <div>{this.props.MComponent}</div>
+        )}
+        <Element name="myScrollToElement" />
         <ButtonComponent
+          name="myScrollToElement"
           addChild={this.props.addChild}
           nextButtonNum={this.props.nextButtonNum}
+          onClick={scroller.scrollTo("myScrollToElement", {
+            duration: 1000,
+            delay: 100,
+            smooth: true
+          })}
         />
       </section>
     );
@@ -132,11 +146,12 @@ class ButtonComponent extends Component {
     super(props);
     this.state = { buttonsDisabled: false, notChosenButton: 0 };
   }
-  disableBtn = (num) => {
+  disableBtn = num => {
     this.refs.btn.setAttribute("disabled", "disabled");
     this.refs.btn2.setAttribute("disabled", "disabled");
-    this.setState( {
-      buttonsDisabled: true, notChosenButton: num
+    this.setState({
+      buttonsDisabled: true,
+      notChosenButton: num
     });
   };
   render() {
@@ -151,9 +166,13 @@ class ButtonComponent extends Component {
           <button
             ref="btn"
             style={{ display: "block", marginBottom: 10 }}
-            className={this.state.buttonsDisabled 
-              ? (this.state.notChosenButton === 1) ? "disabled chosen" : "disabled"
-              : ""}
+            className={
+              this.state.buttonsDisabled
+                ? this.state.notChosenButton === 1
+                  ? "disabled chosen"
+                  : "disabled"
+                : ""
+            }
             onClick={function(event) {
               addChildPointer(0);
               disableBtnPointer(1);
@@ -166,9 +185,13 @@ class ButtonComponent extends Component {
           <button
             ref="btn2"
             style={{ display: "block", marginBottom: 10 }}
-            className={this.state.buttonsDisabled 
-              ? (this.state.notChosenButton === 0) ? "disabled chosen" : "disabled"
-              : ""}
+            className={
+              this.state.buttonsDisabled
+                ? this.state.notChosenButton === 0
+                  ? "disabled chosen"
+                  : "disabled"
+                : ""
+            }
             onClick={function(event) {
               addChildPointer(1);
               disableBtnPointer(0);
