@@ -92,7 +92,7 @@ class StoryComponent extends Component {
   render() {
     // Kuvituskuva 2
     let renderPicture = false;
-    this.props.nextButtonNum === 4
+    this.props.nextButtonNum === 4 || this.props.nextButtonNum === 6
       ? (renderPicture = true)
       : (renderPicture = false);
     const Picture2 = (
