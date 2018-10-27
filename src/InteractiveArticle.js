@@ -1,178 +1,212 @@
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import kuvitus1 from './ZELDA_KUVITUS_psykiatri.gif';
-import kuvitus2 from './ZELDA_KUVITUS_potilas.gif';
-import './InteractiveArticle.css';
-import Child1M from './Story';
-import Child1A from './Story';
-import Child1B from './Story';
-import Child2M from './Story';
-import Child2A from './Story';
-import Child2B from './Story';
-import Child3M from './Story';
-import Child3A from './Story';
-import Child3B from './Story';
-import Child4M from './Story';
-import Child4A from './Story';
-import Child4B from './Story';
-import Child5M from './Story';
-import Child5A from './Story';
-import Child5B from './Story';
-
+import React, { Component } from "react";
+import kuvitus1 from "./ZELDA_KUVITUS_psykiatri.gif";
+import kuvitus2 from "./ZELDA_KUVITUS_potilas.gif";
+import "./InteractiveArticle.css";
+import { getChildTexts, GetButtonTexts, Child1M } from "./Story";
 
 class InteractiveArticle extends Component {
   render() {
     return (
       <div className="InteractiveArticle">
         <div className="Article-header">
-          <img src={kuvitus1} className="psychiatristImage" alt="psychiatristImage" />
-          <p>
-            Vastaanottohuone 317
-          </p>
+          <img
+            src={kuvitus1}
+            className="psychiatristImage"
+            alt="psychiatristImage"
+          />
+          <p>Vastaanottohuone 317</p>
         </div>
-        <ProceedInArticle />
+        <ArticleList />
       </div>
     );
   }
 }
 
-class ProceedInArticle extends Component {
+// Contains all StoryComponents
+class ArticleList extends Component {
   constructor(props) {
     super(props);
-    this.state = {currentChildren: [EmptyElem], currentChildNum: 0, numChildren:0};
+    this.state = { texts: [EmptyElem], numChildren: 0, nextButtonNum: 0 };
+  }
+
+  onAddStory = choiceNum => {
+    // Get next texts and button
+    let textArray = getChildTexts(this.state.nextButtonNum, choiceNum);
+    let elemToAdd = textArray[0];
+    let elemToAdd2 = textArray[1];
+    let jumpToBtn = textArray[2];
+    let paragraphs1 = [];
+    let paragraphs2 = [];
+    elemToAdd.forEach(elem =>
+      paragraphs1.push(<p className="ArticleText">{elem}</p>)
+    );
+    elemToAdd2.forEach(elem =>
+      paragraphs2.push(<p className="ArticleText">{elem}</p>)
+    );
+
+    // Update state
+    this.state.texts.push([paragraphs1, paragraphs2, jumpToBtn]);
+    this.setState(this.state);
+    this.setState({
+      numChildren: this.state.numChildren + 1,
+      nextButtonNum: jumpToBtn
+    });
   };
 
-  render () {
-    const ButtonsToAdd = props => (
-      <ButtonComponent addChild={this.onAddChild}
-                      numOfChildren={this.state.numChildren}>
-      </ButtonComponent>
-    );  
-    const children = [];
+  render() {
+    // Start paragraphs (Child1M)
+    var startParagraphs = [];
+    Child1M.forEach(elem =>
+      startParagraphs.push(<p className="ArticleText">{elem}</p>)
+    );
 
-    for (var i = 0; i < this.state.numChildren; i += 1) {
-
-      if (this.state.currentChildren !== undefined) {
-        this.state.currentChildren.forEach(ChildElem => {
-          children.push(<ChildElem />);
-        });
-      }
-    };
+    // Map StoryComponents
+    var onAdd = this.onAddStory;
+    var storyNodes = this.state.texts.map(function(component, index) {
+      return (
+        <StoryComponent
+          choiceComponent={component[0]}
+          MComponent={component[1]}
+          nextButtonNum={component[2]}
+          key={index}
+          addChild={onAdd}
+        />
+      );
+    });
 
     return (
       <section>
-        <Child1M/>
-        <ButtonsToAdd/>
-        {children}
+        {startParagraphs}
+        {storyNodes}
       </section>
     );
   }
-  onAddChild = (choiceNum) => {
-    const ButtonsToAdd = props => (
-      <ButtonComponent addChild={this.onAddChild}
-                      numOfChildren={this.state.numChildren}>
-      </ButtonComponent>
+}
+
+/* Story Component
+ - returns a comoponent of the story:
+ text, possible pics and the next button 
+ */
+
+class StoryComponent extends Component {
+  render() {
+    // Kuvituskuva 2
+    let renderPicture = false;
+    this.props.nextButtonNum === 4 || this.props.nextButtonNum === 6
+      ? (renderPicture = true)
+      : (renderPicture = false);
+    const Picture2 = (
+      <img
+        src={kuvitus2}
+        className="psychiatristImage"
+        alt="psychiatristImage"
+      />
     );
-    var elemToAdd = getChildTexts(this.state.currentChildNum, choiceNum)[0];
-    var elemToAdd2 = getChildTexts(this.state.currentChildNum, choiceNum)[1];
-    const btns = ButtonsToAdd;
-    this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, elemToAdd]
-    }));
-    this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, elemToAdd2]
-    }));
-    this.setState(prevState => ({
-      currentChildren: [...prevState.currentChildren, btns]
-    }));
-    this.setState({
-      numChildren: this.state.numChildren + 1,
-      currentChildNum: this.state.currentChildNum + 1
-    });
-    //console.log("state: " + this.state.currentChildNum + "  " + this.state.numChildren);
+    // Are we at the end?
+    let isThisRefreshSymbol =
+      this.props.nextButtonNum == 10 ? " fas fa-redo-alt the-end" : "";
+
+    // Purkka-scroll
+    var Scroll = require("react-scroll");
+    var Element = Scroll.Element;
+    var scroller = Scroll.scroller;
+
+    return (
+      <section>
+        {this.props.choiceComponent}
+        {renderPicture && Picture2}
+        {isThisRefreshSymbol ? (
+          <div className="the-end-container ArticleText">
+            <a href="." className={isThisRefreshSymbol}> </a>
+          </div>
+        ) : (
+          <div>{this.props.MComponent}</div>
+        )}
+        <Element name="myScrollToElement" />
+        <ButtonComponent
+          name="myScrollToElement"
+          addChild={this.props.addChild}
+          nextButtonNum={this.props.nextButtonNum}
+          onClick={scroller.scrollTo("myScrollToElement", {
+            duration: 1000,
+            delay: 100,
+            smooth: true
+          })}
+        />
+      </section>
+    );
   }
-};
+}
 
-var ButtonTexts = [];
-ButtonTexts[0] = ["En osaa sanoa, auttaako lääke.", "Kerron, että lääke ei auta."];
-ButtonTexts[1] = ["Kerron, että pärjään.", "Sanon, että en luota itseeni."];
-ButtonTexts[2] = ["Otan esille toiveeni saada puheapua.", "Ei ole."];
-ButtonTexts[3] = ["Suostun sähköhoitoon pelostani huolimatta.", "En halua sähköhoitoa."];
-ButtonTexts[4] = ["En voi luovuttaa vielä. Vaadin puheapua.", "Pysyn hiljaa. Eivät sanani merkitse mitään."];
-ButtonTexts[5] = ["Ei käy!", "Pyydän psykiatrilta anteeksi."];
-ButtonTexts[6] = ["Luotan psykiatrin arvioon.", "Kieltäydyn menemästä osastolle."];
+/* Button Component returns two buttons, which represent the choices that the reader can make.
+ - if the next button number is 10, the story is over and no new buttons will be added
+*/
+class ButtonComponent extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { buttonsDisabled: false, notChosenButton: 0 };
+  }
+  disableBtn = num => {
+    this.refs.btn.setAttribute("disabled", "disabled");
+    this.refs.btn2.setAttribute("disabled", "disabled");
+    this.setState({
+      buttonsDisabled: true,
+      notChosenButton: num
+    });
+  };
+  render() {
+    var addChildPointer = this.props.addChild;
+    var disableBtnPointer = this.disableBtn;
 
-function GetButtonTexts(buttonNum, selectedChoice) {
-  return ButtonTexts[buttonNum][selectedChoice];
-};
-
-// Tried buttoncomp. as class because wanted to deactive them
-// class ButtonComponent extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.deactive = this.deactivate.bind(this);
-//     this.state = { active: true };
-//   }
-//   deactivate() {
-//     this.className = "deactivatedBtn";
-//   }
-//   render() {
-//     return (
-//     <div className="card calculator">
-//       <p className="ArticleText">
-//             <button style={{display: 'block', marginBottom: 10}} 
-//               onClick={function(event){ this.addChild(0); this.deactivate(); /*props.addChild()*/ }}>
-//               {(this.props.numOfChildren !== undefined) ? GetButtonTexts(this.props.numOfChildren, 0) : GetButtonTexts(0, 0)}
-//             </button>
-//             <button style={{display: 'block', marginBottom: 10}} 
-//               onClick={function(event){ this.addChild(1); /*props.addChild()*/ }}>
-//               {(this.props.numOfChildren !== undefined) ? GetButtonTexts(this.props.numOfChildren, 1) : GetButtonTexts(0, 1)}
-//             </button>
-//       </p>
-//     </div>
-//     )};
-//   }
-
-const ButtonComponent = props =>
-  (
-  <div className="card calculator">
-    <p className="ArticleText">
-          <button style={{display: 'block', marginBottom: 10}} 
-            onClick={function(event){ props.addChild(0); /*props.addChild()*/ }}>
-            {(props.numOfChildren !== undefined) ? GetButtonTexts(props.numOfChildren, 0) : GetButtonTexts(0, 0)}
+    return this.props.nextButtonNum == "10" ? (
+      ""
+    ) : (
+      <div className="ButtonComp">
+        <p className="ArticleText">
+          <button
+            ref="btn"
+            style={{ display: "block", marginBottom: 10 }}
+            className={
+              this.state.buttonsDisabled
+                ? this.state.notChosenButton === 1
+                  ? "disabled chosen"
+                  : "disabled"
+                : ""
+            }
+            onClick={function(event) {
+              addChildPointer(0);
+              disableBtnPointer(1);
+            }}
+          >
+            {this.props.nextButtonNum !== undefined
+              ? GetButtonTexts(this.props.nextButtonNum, 0)
+              : GetButtonTexts(0, 0)}
           </button>
-          <button style={{display: 'block', marginBottom: 10}} 
-            onClick={function(event){ props.addChild(1); /*props.addChild()*/ }}>
-            {(props.numOfChildren !== undefined) ? GetButtonTexts(props.numOfChildren, 1) : GetButtonTexts(0, 1)}
+          <button
+            ref="btn2"
+            style={{ display: "block", marginBottom: 10 }}
+            className={
+              this.state.buttonsDisabled
+                ? this.state.notChosenButton === 0
+                  ? "disabled chosen"
+                  : "disabled"
+                : ""
+            }
+            onClick={function(event) {
+              addChildPointer(1);
+              disableBtnPointer(0);
+            }}
+          >
+            {this.props.nextButtonNum !== undefined
+              ? GetButtonTexts(this.props.nextButtonNum, 1)
+              : GetButtonTexts(0, 1)}
           </button>
-    </p>
-  </div>
-);
+        </p>
+      </div>
+    );
+  }
+}
 
-const EmptyElem = props => (
-  <section>
-  </section>
-);
-
-const TheEnd = props => (
-  <section>
-    <p className="ArticleText">
-      LOPPU.
-    </p>
-    </section>
-);
-
-// Connect button choices to texts:
-// ChildTexts[btnNum][choice] = main text + choice text
-var ChildTexts = [];
-ChildTexts[0] = [[Child1A, Child2M], [Child1B, Child2M]];
-ChildTexts[1] = [[Child2A, Child3M], [Child2B, Child4M]];
-ChildTexts[2] = [[Child3A, Child5M], [Child3B, TheEnd]];
-
-function getChildTexts(buttonNum, choice) {
-  console.log("buttonNum: " + buttonNum + ", choice: " + choice);
-  var allText = ChildTexts[buttonNum][choice];
-  return allText;
-};
+const EmptyElem = props => <section />;
 
 export default InteractiveArticle;
