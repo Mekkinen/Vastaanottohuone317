@@ -26,6 +26,9 @@ button:hover {
 button.disabled {
   background-color: #ffa281;
 }
+button.chosen {
+  background-color: #000 !important;
+}
 .orange-text {
   color: #ff4301;
 }

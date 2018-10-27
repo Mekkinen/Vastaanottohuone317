@@ -1,5 +1,3 @@
-import React, { Component } from 'react';
-import kuvitus2 from './ZELDA_KUVITUS_potilas.gif';
 
 export const Child1M = [
   `“Laine?” Katseeni kiinnittyy vastaanottohuoneen numero 317 edessä seisovaan
@@ -629,18 +627,43 @@ sairaalasängyt ja lepositeet. Kylmä aalto käy lävitseni ja minua pyörryttä
 tiedä mihin uskoa.
   `];
 
-const STORYEXP = [];
-STORYEXP.push(Child1M, Child1A, Child1B, Child2M, Child2A, Child2B, Child3M, Child3A, Child3B, Child4M, Child4A, Child4B, 
-                   Child5M, Child5A, Child5B, Child6M, Child6A, Child6B, Child7M, Child7A, Child7B);
 
-  // const STORYEXP = [];
-  // STORYEXP.push(<Child1M key={"1M"} />, <Child1A key={"1A"}/>, <Child1B key={"1B"}/>, <Child2M key={"2M"}/>, <Child2A key={"2A"}/>, <Child2B key={"2B"}/>,
-  //               <Child3M key={"3M"}/>, <Child3A key={"3A"}/>, <Child3B key={"3B"}/>, <Child4M key={"4M"}/>, <Child4A key={"4A"}/>, <Child4B key={"4B"}/>, 
-  //               <Child5M key={"5M"}/>, <Child5A key={"5A"}/>, <Child5B key={"5B"}/>, <Child6M key={"6M"}/>, <Child6A key={"6A"}/>, <Child6B key={"6B"}/>,
-  //               <Child7M key={"7M"}/>, <Child7A key={"7A"}/>, <Child7B key={"7B"}/>);
-  // export default STORYEXP;
+export const TheEnd = [
+      `♦`
+    ]
 
-  // const STORY = Object.assign({}, Child1M, Child1A, Child1B, Child2M, Child2A, Child2B, Child3M, Child3A, Child3B, Child4M, Child4A, Child4B, 
-  //                 Child5M, Child5A, Child5B, Child6M, Child6A, Child6B, Child7M, Child7A, Child7B`];
-                  
-   export default STORYEXP;
+/* Create the story map
+ Connect button choices to texts:
+ ChildTexts[btnNum][choice] = main text, choice text, button to jump to 
+*/
+
+var ChildTexts = [];
+ChildTexts[0] = [[Child1A, Child2M, 1], [Child1B, Child2M, 1]];
+ChildTexts[1] = [[Child2A, Child3M, 2], [Child2B, Child4M, 3]];
+ChildTexts[2] = [[Child3A, Child5M, 4], [Child3B, TheEnd, 10]];
+ChildTexts[3] = [[Child4A, Child7M, 6], [Child4B, Child5M, 4]];
+ChildTexts[4] = [[Child5A, Child6M, 5], [Child5B, TheEnd, 10]];
+ChildTexts[5] = [[Child6A, TheEnd, 10], [Child6B, TheEnd, 10]];
+ChildTexts[6] = [[Child7A, TheEnd, 10], [Child7B, TheEnd, 10]];
+
+export function getChildTexts(buttonNum, choice) {
+//console.log("buttonNum: " + buttonNum + ", choice: " + choice);
+return ChildTexts[buttonNum][choice];
+};
+
+// Button texts for each level in the story
+var ButtonTexts = [];
+ButtonTexts[0] = ["En osaa sanoa, auttaako lääke.", "Kerron, että lääke ei auta."];
+ButtonTexts[1] = ["Kerron, että pärjään.", "Sanon, että en luota itseeni."];
+ButtonTexts[2] = ["Otan esille toiveeni saada puheapua.", "Ei ole."];
+ButtonTexts[3] = ["Suostun sähköhoitoon pelostani huolimatta.", "En halua sähköhoitoa."];
+ButtonTexts[4] = ["En voi luovuttaa vielä. Vaadin puheapua.", "Pysyn hiljaa. Eivät sanani merkitse mitään."];
+ButtonTexts[5] = ["Ei käy!", "Pyydän psykiatrilta anteeksi."];
+ButtonTexts[6] = ["Luotan psykiatrin arvioon.", "Kieltäydyn menemästä osastolle."];
+
+export function GetButtonTexts(buttonNum, selectedChoice) {
+  //console.log("GetButtonTexts... buttonNum, selectedChoice : " + buttonNum + ", " + selectedChoice);
+  return ButtonTexts[buttonNum][selectedChoice];
+};
+                   
+export default getChildTexts;
